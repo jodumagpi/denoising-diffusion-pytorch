@@ -501,8 +501,10 @@ class Trainer(object):
             for i in range(self.gradient_accumulate_every):
                 data = next(self.dl).cuda()
                 loss = self.model(data)
-                print(f'{self.step}: {loss.item()}')
                 backwards(loss / self.gradient_accumulate_every, self.opt)
+                
+            if self.step % 100:
+                print(f'{self.step}: {loss.item()}')
 
             self.opt.step()
             self.opt.zero_grad()
