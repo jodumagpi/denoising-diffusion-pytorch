@@ -453,9 +453,9 @@ class ImageChecker(object):
     def __init__(self, size):
         self.size = size
         
-    def __call__(self, image):
+    def __call__(self, index):
         image_size = self.size
-        return Dataset(folder, image_size)[0]
+        return Dataset(folder, image_size)[index]
         
     
 # trainer class
