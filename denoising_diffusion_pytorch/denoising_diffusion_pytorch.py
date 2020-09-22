@@ -414,7 +414,7 @@ class Dataset(data.Dataset):
         self.paths = [p for ext in EXTS for p in Path(f'{folder}').glob(f'**/*.{ext}')]
 
         self.transform = transforms.Compose([
-            transforms.ResizeImage(128),
+            transforms.ResizeImage(self.image_size),
             transforms.RandomHorizontalFlip(),
             transforms.RandomVerticalFlip(),
             transforms.ToTensor()
