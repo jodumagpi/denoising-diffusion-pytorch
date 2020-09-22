@@ -447,7 +447,16 @@ class ResizeImage(object):
             H_new = int((size/W) * H)
             background[0:H_new, 0:W_new, :] = image.resize((W_new, H_new))
         return transforms.ToPILImage()(background)
-    
+ 
+class ImageChecker(object):
+    """Check if images are correclty transformed for my sanity."""
+    def __init__(self, size):
+        self.size = size
+        
+    def __call__(self, image):
+        image_size = self.size
+        return Dataset(folder, image_size)[0]
+        
     
 # trainer class
 
