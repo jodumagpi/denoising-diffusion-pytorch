@@ -524,7 +524,7 @@ class Trainer(object):
                 loss = self.model(data)
                 backwards(loss / self.gradient_accumulate_every, self.opt)
                 
-            if self.step % 100:
+            if self.step % 100 == 0:
                 print(f'{self.step}: {loss.item()}')
 
             self.opt.step()
