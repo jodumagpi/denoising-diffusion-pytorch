@@ -16,6 +16,10 @@ import numpy as np
 from tqdm import tqdm
 from einops import rearrange
 
+import pickle, os
+from shutil import copyfile
+from zipfile import ZipFile 
+
 try:
     from apex import amp
     APEX_AVAILABLE = True
@@ -23,7 +27,7 @@ except:
     APEX_AVAILABLE = False
 
 # constants
-
+FILENAME = 'GEN_GUNS'
 SAVE_AND_SAMPLE_EVERY = 5000
 UPDATE_EMA_EVERY = 10
 EXTS = ['jpg', 'png']
@@ -505,7 +509,7 @@ class Trainer(object):
             'model': self.model.state_dict(),
             'ema': self.ema_model.state_dict()
         }
-        torch.save(data, f'./model-{milestone}.pt')
+        torch.save(data, f'./results/model-{milestone}.pt')
 
     def load(self, milestone):
         data = torch.load(f'./model-{milestone}.pt')
@@ -537,10 +541,28 @@ class Trainer(object):
                 batches = num_to_groups(36, self.batch_size)
                 all_images_list = list(map(lambda n: self.ema_model.sample(self.image_size, batch_size=n), batches))
                 all_images = torch.cat(all_images_list, dim=0)
-                utils.save_image(all_images, f'./sample-{milestone}.png', nrow=6)
+                utils.save_image(all_images, f'./results/sample-{milestone}.png', nrow=6)
                 self.save(milestone)
+                file_paths = get_all_file_paths('./results/')
+                with ZipFile('{}.zip'.format(FILENAME),'w') as zip: 
+                    for file in file_paths: 
+                        zip.write(file) 
+                copyfile('./{}.zip'.format(FILENAME), './drive/My Drive/{}.zip'.format(FILENAME))
+                print('Saving weights...')
 
             self.step += 1
 
         print('training completed')
         
+def get_all_file_paths(directory): 
+  
+    # initializing empty file paths list 
+    file_paths = [] 
+  
+    # crawling through directory and subdirectories 
+    for root, directories, files in os.walk(directory): 
+        for filename in files:
+            filepath = os.path.join(root, filename) 
+            file_paths.append(filepath) 
+    # returning all file paths 
+    return file_paths
