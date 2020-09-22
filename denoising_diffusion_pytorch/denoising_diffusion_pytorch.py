@@ -414,9 +414,9 @@ class Dataset(data.Dataset):
         self.paths = [p for ext in EXTS for p in Path(f'{folder}').glob(f'**/*.{ext}')]
 
         self.transform = transforms.Compose([
-            transforms.Resize(image_size),
+            transforms.ResizeImage(128),
             transforms.RandomHorizontalFlip(),
-            transforms.CenterCrop(image_size),
+            transforms.RandomVerticalFlip(),
             transforms.ToTensor()
         ])
 
@@ -428,6 +428,27 @@ class Dataset(data.Dataset):
         img = Image.open(path)
         return self.transform(img)
 
+class ResizeImage(object):
+    """Paste the whole image to another background."""
+    def __init__(self, size):
+        self.size = size
+
+    def __call__(self, image):
+        
+        size = self.size
+        H, W = image.height, image.width
+        background = (np.ones((size, size, 3)) * 255).astype(np.uint8)
+        if H > W:
+            H_new = size
+            W_new = int((size/H) * W)
+            background[0:H_new, 0:W_new, :] = image.resize((W_new, H_new))
+        else:
+            W_new = size
+            H_new = int((size/W) * H)
+            background[0:H_new, 0:W_new, :] = image.resize((W_new, H_new))
+        return transforms.ToPILImage()(background)
+    
+    
 # trainer class
 
 class Trainer(object):
@@ -523,3 +544,4 @@ class Trainer(object):
             self.step += 1
 
         print('training completed')
+        
